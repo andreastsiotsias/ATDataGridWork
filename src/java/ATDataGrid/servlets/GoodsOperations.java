@@ -7,6 +7,7 @@ package ATDataGrid.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Enumeration;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -29,18 +30,31 @@ public class GoodsOperations extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
+        System.out.println ("Request Protocol: "+request.getProtocol());
+        System.out.println ("Request Method: "+request.getMethod());
+        // check if JSONP ....
+        boolean isJSONP = false;
+        String jsonpCallback = request.getParameter("callback");
+        if (!jsonpCallback.isEmpty()) {
+            isJSONP = true;
+        }
+        System.out.println ("Request is JSONP with callback: "+jsonpCallback);
+        System.out.println ("Request parameters Start");
+        Enumeration<String> requestParams = request.getParameterNames();
+        while (requestParams.hasMoreElements()) {
+            String param = requestParams.nextElement();
+            System.out.println ("--> "+param+" Value: "+request.getParameter(param));
+        }
+        System.out.println ("Request Parameters End");
+        response.setContentType("application/json;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet GoodsOperations</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet GoodsOperations at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+            if (isJSONP) {
+                out.println(jsonpCallback+"({});");
+            }
+            else {
+                out.println("{}");
+            }
         }
     }
 
