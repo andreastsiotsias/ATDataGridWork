@@ -35,7 +35,7 @@ public class GoodsOperations extends HttpServlet {
         // check if JSONP ....
         boolean isJSONP = false;
         String jsonpCallback = request.getParameter("callback");
-        if (!jsonpCallback.isEmpty()) {
+        if(jsonpCallback != null && !jsonpCallback.isEmpty()) {
             isJSONP = true;
         }
         System.out.println ("Request is JSONP with callback: "+jsonpCallback);
@@ -53,7 +53,7 @@ public class GoodsOperations extends HttpServlet {
                 out.println(jsonpCallback+"({});");
             }
             else {
-                out.println("{}");
+                out.println("{\"retCode\": 0}");
             }
         }
     }
