@@ -45,6 +45,8 @@ public class GoodsOperations extends HttpServlet {
             System.out.println ("--> "+param+" Value: "+request.getParameter(param));
         }
         System.out.println ("Request Parameters End");
+        System.out.println ("Going to sleep for 2 seconds");
+        try{Thread.sleep(2000);}catch(InterruptedException e){System.out.println(e);}
         response.setContentType("application/json;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
