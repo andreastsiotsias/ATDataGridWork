@@ -35,10 +35,9 @@ public class GoodsOperations extends HttpServlet {
         // check if JSONP ....
         boolean isJSONP = false;
         String jsonpCallback = request.getParameter("callback");
-        if (!jsonpCallback.isEmpty()) {
+        if(jsonpCallback != null && !jsonpCallback.isEmpty()) {
             isJSONP = true;
         }
-        System.out.println ("Request is JSONP with callback: "+jsonpCallback);
         System.out.println ("Request parameters Start");
         Enumeration<String> requestParams = request.getParameterNames();
         while (requestParams.hasMoreElements()) {
@@ -46,14 +45,18 @@ public class GoodsOperations extends HttpServlet {
             System.out.println ("--> "+param+" Value: "+request.getParameter(param));
         }
         System.out.println ("Request Parameters End");
+        System.out.println ("Going to sleep for 2 seconds");
+        try{Thread.sleep(2000);}catch(InterruptedException e){System.out.println(e);}
         response.setContentType("application/json;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             if (isJSONP) {
+                System.out.println ("Request is JSONP with callback: "+jsonpCallback);
                 out.println(jsonpCallback+"({});");
             }
             else {
-                out.println("{}");
+                System.out.println ("Request is JSON");
+                out.println("{\"retCode\": 0}");
             }
         }
     }
