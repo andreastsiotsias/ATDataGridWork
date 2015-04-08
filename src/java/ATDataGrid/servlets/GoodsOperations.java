@@ -37,6 +37,7 @@ public class GoodsOperations extends HttpServlet {
         String jsonpCallback = request.getParameter("callback");
         if(jsonpCallback != null && !jsonpCallback.isEmpty()) {
             isJSONP = true;
+            System.out.println ("Request is JSONP with callback: "+jsonpCallback);
         }
         System.out.println ("Request parameters Start");
         Enumeration<String> requestParams = request.getParameterNames();
@@ -51,12 +52,10 @@ public class GoodsOperations extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             if (isJSONP) {
-                System.out.println ("Request is JSONP with callback: "+jsonpCallback);
-                out.println(jsonpCallback+"({});");
+                out.println(jsonpCallback+"({\"ReturnCode\": 0});");
             }
             else {
-                System.out.println ("Request is JSON");
-                out.println("{\"retCode\": 0}");
+                out.println("{\"ReturnCode\": 0}");
             }
         }
     }
