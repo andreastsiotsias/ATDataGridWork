@@ -5,6 +5,8 @@
  */
 package ATDataGrid.servlets;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
@@ -46,6 +48,16 @@ public class GoodsOperations extends HttpServlet {
             System.out.println ("--> "+param+" Value: "+request.getParameter(param));
         }
         System.out.println ("Request Parameters End");
+        //
+        // decode change request from JSON to a Change Descriptor object
+        String json_string = request.getParameter("changeRecord");
+        Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+        changeDescriptor chgReq = gson.fromJson(json_string, changeDescriptor.class);
+        System.out.println ("Received - OPERATION: "+chgReq.operation);
+        System.out.println ("Received - UID_REFERENCE: "+chgReq.uid_reference);
+        System.out.println ("Received - UNIQUE KEY: "+chgReq.uniqueKey);
+        System.out.println ("Received - RECORD: "+chgReq.record);
+        //
         System.out.println ("Going to sleep for 2 seconds");
         try{Thread.sleep(2000);}catch(InterruptedException e){System.out.println(e);}
         response.setContentType("application/json;charset=UTF-8");
