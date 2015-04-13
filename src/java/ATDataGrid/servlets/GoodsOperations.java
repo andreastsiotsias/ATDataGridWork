@@ -13,11 +13,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -43,38 +40,41 @@ public class GoodsOperations extends HttpServlet {
      * Has over-ridden destroy() method - to close mySQL database connection 
      */
     private Connection con = null;
+    private String connectionURL = null;
+    private String connectionUser = null;
+    private String connectionPass = null;
     
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         // Get the initialisation parameters
-        System.out.println("Connection URL: "+getInitParameter("connectionURL"));
-        System.out.println("Connection User: "+getInitParameter("connectionUser"));
-        System.out.println("Connection Passsword: "+getInitParameter("connectionPass"));
+        connectionURL = getInitParameter("connectionURL");
+        connectionUser = getInitParameter("connectionUser");
+        connectionPass = getInitParameter("connectionPass");
         //
         try {
             // Load (and therefore register) the Sybase driver
             System.out.println("Loading driver ....");
-            try {
-                Class.forName("com.mysql.jdbc.Driver").newInstance();
-            } catch (InstantiationException | IllegalAccessException ex) {
-                Logger.getLogger(GoodsOperations.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            System.out.println("Starting connection ....");
+            Class.forName("com.mysql.jdbc.Driver");
+            System.out.println("Loaded driver !");
+            System.out.println("Starting connection "+connectionURL+" ....");
             con = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/classicmodels", "ide", "Linden02");
+                    connectionURL, connectionUser, connectionPass);
+            System.out.println("Connected OK !");
+            System.out.println("Catalogue: "+con.getCatalog());
         }
         catch (ClassNotFoundException e) { 
-            throw new UnavailableException(this, "Couldn't load database driver");
+            System.out.println("Could not load MySQL database driver");
         }    
         catch (SQLException e) { 
-            throw new UnavailableException(this, "Couldn't get db connection");
+            System.out.println("Couldn't get MySQL database connection");
         }    
     }
     
     @Override
     public void destroy() {
         // Clean up.
+        System.out.println("In Servlet Destroy method ....");
         try {
             if (con != null) con.close();
         }
@@ -83,8 +83,8 @@ public class GoodsOperations extends HttpServlet {
     
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println ("Request Protocol: "+request.getProtocol());
-        System.out.println ("Request Method: "+request.getMethod());
+        //System.out.println ("Request Protocol: "+request.getProtocol());
+        //System.out.println ("Request Method: "+request.getMethod());
         // check if JSONP ....
         boolean isJSONP = false;
         String jsonpCallback = request.getParameter("callback");
@@ -92,13 +92,13 @@ public class GoodsOperations extends HttpServlet {
             isJSONP = true;
             System.out.println ("Request is JSONP with callback: "+jsonpCallback);
         }
-        System.out.println ("Request parameters Start");
+        //System.out.println ("Request parameters Start");
         Enumeration<String> requestParams = request.getParameterNames();
         while (requestParams.hasMoreElements()) {
             String param = requestParams.nextElement();
-            System.out.println ("--> "+param+" Value: "+request.getParameter(param));
+            //System.out.println ("--> "+param+" Value: "+request.getParameter(param));
         }
-        System.out.println ("Request Parameters End");
+        //System.out.println ("Request Parameters End");
         //
         // decode change request from JSON to a Change Descriptor object
         String json_string = request.getParameter("changeRecord");
@@ -109,8 +109,8 @@ public class GoodsOperations extends HttpServlet {
         System.out.println ("Received - UNIQUE KEY: "+chgReq.uniqueKey);
         System.out.println ("Received - RECORD: "+chgReq.record);
         //
-        System.out.println ("Going to sleep for 2 seconds");
-        try{Thread.sleep(2000);}catch(InterruptedException e){System.out.println(e);}
+        //System.out.println ("Going to sleep for 2 seconds");
+        //try{Thread.sleep(2000);}catch(InterruptedException e){System.out.println(e);}
         response.setContentType("application/json;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */

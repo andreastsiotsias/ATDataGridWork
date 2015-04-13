@@ -6,7 +6,7 @@
         <init-param>
             <description>The MySQL connection URL</description>
             <param-name>connectionURL</param-name>
-            <param-value>jdbc:sybase:Tds:dbhost:7678</param-value>
+            <param-value>jdbc:mysql://localhost:3306/classicmodels</param-value>
         </init-param>
         <init-param>
             <description>The user ID for database connection</description>
@@ -19,19 +19,14 @@
             <param-value>Linden02</param-value>
         </init-param>
         <init-param>
-            <description>The database name corresponding to this servlet</description>
-            <param-name>servletDatabase</param-name>
-            <param-value>GoodsDB</param-value>
-        </init-param>
-        <init-param>
             <description>The schema name corresponding to this servlet</description>
             <param-name>servletSchema</param-name>
-            <param-value>MyGoods</param-value>
+            <param-value>classicmodels</param-value>
         </init-param>
         <init-param>
             <description>The table name corresponding to this servlet</description>
             <param-name>servletTable</param-name>
-            <param-value>Goods</param-value>
+            <param-value>products</param-value>
         </init-param>
     </servlet>
     <servlet>
