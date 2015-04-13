@@ -9,8 +9,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +37,50 @@ public class GoodsOperations extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    /**
+     * 
+     * Had over-ridden init() method - open MySQL database connection
+     * Has over-ridden destroy() method - to close mySQL database connection 
+     */
+    private Connection con = null;
+    
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        // Get the initialisation parameters
+        System.out.println("Connection URL: "+getInitParameter("connectionURL"));
+        System.out.println("Connection User: "+getInitParameter("connectionUser"));
+        System.out.println("Connection Passsword: "+getInitParameter("connectionPass"));
+        //
+        try {
+            // Load (and therefore register) the Sybase driver
+            System.out.println("Loading driver ....");
+            try {
+                Class.forName("com.mysql.jdbc.Driver").newInstance();
+            } catch (InstantiationException | IllegalAccessException ex) {
+                Logger.getLogger(GoodsOperations.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            System.out.println("Starting connection ....");
+            con = DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/classicmodels", "ide", "Linden02");
+        }
+        catch (ClassNotFoundException e) { 
+            throw new UnavailableException(this, "Couldn't load database driver");
+        }    
+        catch (SQLException e) { 
+            throw new UnavailableException(this, "Couldn't get db connection");
+        }    
+    }
+    
+    @Override
+    public void destroy() {
+        // Clean up.
+        try {
+            if (con != null) con.close();
+        }
+        catch (SQLException ignored) { }
+    }
+    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         System.out.println ("Request Protocol: "+request.getProtocol());
