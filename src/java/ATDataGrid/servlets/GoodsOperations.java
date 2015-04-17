@@ -43,6 +43,17 @@ public class GoodsOperations extends HttpServlet {
     private String connectionURL = null;
     private String connectionUser = null;
     private String connectionPass = null;
+    //
+    String json_oper = null;
+    String json_record = null;
+    String json_accessCode = null;
+    Gson gson = null;
+    //
+    String jsonpCallback = null;
+    boolean isJSONP = false;
+    //
+    Enumeration<String> requestParams;
+    changeDescriptor chgReq = null;
     
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -51,6 +62,8 @@ public class GoodsOperations extends HttpServlet {
         connectionURL = getInitParameter("connectionURL");
         connectionUser = getInitParameter("connectionUser");
         connectionPass = getInitParameter("connectionPass");
+        // prepare the GSON factory
+        gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
         //
         try {
             // Load (and therefore register) the Sybase driver
@@ -86,24 +99,25 @@ public class GoodsOperations extends HttpServlet {
         //System.out.println ("Request Protocol: "+request.getProtocol());
         //System.out.println ("Request Method: "+request.getMethod());
         // check if JSONP ....
-        boolean isJSONP = false;
-        String jsonpCallback = request.getParameter("callback");
+        isJSONP = false;
+        jsonpCallback = request.getParameter("callback");
         if(jsonpCallback != null && !jsonpCallback.isEmpty()) {
             isJSONP = true;
             System.out.println ("Request is JSONP with callback: "+jsonpCallback);
         }
         //System.out.println ("Request parameters Start");
-        Enumeration<String> requestParams = request.getParameterNames();
-        while (requestParams.hasMoreElements()) {
-            String param = requestParams.nextElement();
+        requestParams = request.getParameterNames();
+        //while (requestParams.hasMoreElements()) {
+        //    String param = requestParams.nextElement();
             //System.out.println ("--> "+param+" Value: "+request.getParameter(param));
-        }
+        //}
         //System.out.println ("Request Parameters End");
         //
-        // decode change request from JSON to a Change Descriptor object
-        String json_string = request.getParameter("changeRecord");
-        Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
-        changeDescriptor chgReq = gson.fromJson(json_string, changeDescriptor.class);
+        // see what the request is
+        json_oper = request.getParameter("Operation");
+        // decode request from JSON to a Change Descriptor object
+        json_record = request.getParameter("Record");
+        chgReq = gson.fromJson(json_record, changeDescriptor.class);
         System.out.println ("Received - OPERATION: "+chgReq.operation);
         System.out.println ("Received - UID_REFERENCE: "+chgReq.uid_reference);
         System.out.println ("Received - UNIQUE KEY: "+chgReq.uniqueKey);
