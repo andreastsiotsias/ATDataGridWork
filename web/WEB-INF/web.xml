@@ -3,6 +3,31 @@
     <servlet>
         <servlet-name>GoodsOperations</servlet-name>
         <servlet-class>ATDataGrid.servlets.GoodsOperations</servlet-class>
+        <init-param>
+            <description>The MySQL connection URL</description>
+            <param-name>connectionURL</param-name>
+            <param-value>jdbc:mysql://localhost:3306/classicmodels</param-value>
+        </init-param>
+        <init-param>
+            <description>The user ID for database connection</description>
+            <param-name>connectionUser</param-name>
+            <param-value>ide</param-value>
+        </init-param>
+        <init-param>
+            <description>The password to use in database connection</description>
+            <param-name>connectionPass</param-name>
+            <param-value>Linden02</param-value>
+        </init-param>
+        <init-param>
+            <description>The schema name corresponding to this servlet</description>
+            <param-name>servletSchema</param-name>
+            <param-value>classicmodels</param-value>
+        </init-param>
+        <init-param>
+            <description>The table name corresponding to this servlet</description>
+            <param-name>servletTable</param-name>
+            <param-value>products</param-value>
+        </init-param>
     </servlet>
     <servlet>
         <servlet-name>GoodsDescriptor</servlet-name>

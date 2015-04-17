@@ -9,7 +9,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Enumeration;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -30,36 +34,97 @@ public class GoodsOperations extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    /**
+     * 
+     * Had over-ridden init() method - open MySQL database connection
+     * Has over-ridden destroy() method - to close mySQL database connection 
+     */
+    private Connection con = null;
+    private String connectionURL = null;
+    private String connectionUser = null;
+    private String connectionPass = null;
+    //
+    String json_oper = null;
+    String json_record = null;
+    String json_accessCode = null;
+    Gson gson = null;
+    //
+    String jsonpCallback = null;
+    boolean isJSONP = false;
+    //
+    Enumeration<String> requestParams;
+    changeDescriptor chgReq = null;
+    
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        // Get the initialisation parameters
+        connectionURL = getInitParameter("connectionURL");
+        connectionUser = getInitParameter("connectionUser");
+        connectionPass = getInitParameter("connectionPass");
+        // prepare the GSON factory
+        gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+        //
+        try {
+            // Load (and therefore register) the Sybase driver
+            System.out.println("Loading driver ....");
+            Class.forName("com.mysql.jdbc.Driver");
+            System.out.println("Loaded driver !");
+            System.out.println("Starting connection "+connectionURL+" ....");
+            con = DriverManager.getConnection(
+                    connectionURL, connectionUser, connectionPass);
+            System.out.println("Connected OK !");
+            System.out.println("Catalogue: "+con.getCatalog());
+        }
+        catch (ClassNotFoundException e) { 
+            System.out.println("Could not load MySQL database driver");
+        }    
+        catch (SQLException e) { 
+            System.out.println("Couldn't get MySQL database connection");
+        }    
+    }
+    
+    @Override
+    public void destroy() {
+        // Clean up.
+        System.out.println("In Servlet Destroy method ....");
+        try {
+            if (con != null) con.close();
+        }
+        catch (SQLException ignored) { }
+    }
+    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println ("Request Protocol: "+request.getProtocol());
-        System.out.println ("Request Method: "+request.getMethod());
+        //System.out.println ("Request Protocol: "+request.getProtocol());
+        //System.out.println ("Request Method: "+request.getMethod());
         // check if JSONP ....
-        boolean isJSONP = false;
-        String jsonpCallback = request.getParameter("callback");
+        isJSONP = false;
+        jsonpCallback = request.getParameter("callback");
         if(jsonpCallback != null && !jsonpCallback.isEmpty()) {
             isJSONP = true;
             System.out.println ("Request is JSONP with callback: "+jsonpCallback);
         }
-        System.out.println ("Request parameters Start");
-        Enumeration<String> requestParams = request.getParameterNames();
-        while (requestParams.hasMoreElements()) {
-            String param = requestParams.nextElement();
-            System.out.println ("--> "+param+" Value: "+request.getParameter(param));
-        }
-        System.out.println ("Request Parameters End");
+        //System.out.println ("Request parameters Start");
+        requestParams = request.getParameterNames();
+        //while (requestParams.hasMoreElements()) {
+        //    String param = requestParams.nextElement();
+            //System.out.println ("--> "+param+" Value: "+request.getParameter(param));
+        //}
+        //System.out.println ("Request Parameters End");
         //
-        // decode change request from JSON to a Change Descriptor object
-        String json_string = request.getParameter("changeRecord");
-        Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
-        changeDescriptor chgReq = gson.fromJson(json_string, changeDescriptor.class);
+        // see what the request is
+        json_oper = request.getParameter("Operation");
+        // decode request from JSON to a Change Descriptor object
+        json_record = request.getParameter("Record");
+        chgReq = gson.fromJson(json_record, changeDescriptor.class);
         System.out.println ("Received - OPERATION: "+chgReq.operation);
         System.out.println ("Received - UID_REFERENCE: "+chgReq.uid_reference);
         System.out.println ("Received - UNIQUE KEY: "+chgReq.uniqueKey);
         System.out.println ("Received - RECORD: "+chgReq.record);
         //
-        System.out.println ("Going to sleep for 2 seconds");
-        try{Thread.sleep(2000);}catch(InterruptedException e){System.out.println(e);}
+        //System.out.println ("Going to sleep for 2 seconds");
+        //try{Thread.sleep(2000);}catch(InterruptedException e){System.out.println(e);}
         response.setContentType("application/json;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
