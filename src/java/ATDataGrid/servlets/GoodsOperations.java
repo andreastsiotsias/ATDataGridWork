@@ -53,7 +53,7 @@ public class GoodsOperations extends HttpServlet {
     boolean isJSONP = false;
     //
     Enumeration<String> requestParams;
-    RequestRecord chgReq = null;
+    RequestRecord reqRec = null;
     
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -117,11 +117,13 @@ public class GoodsOperations extends HttpServlet {
         json_oper = request.getParameter("Operation");
         // decode request from JSON to a Change Descriptor object
         json_record = request.getParameter("Record");
-        chgReq = gson.fromJson(json_record, RequestRecord.class);
-        System.out.println ("Received - OPERATION: "+chgReq.operation);
-        System.out.println ("Received - UID_REFERENCE: "+chgReq.uid_reference);
-        System.out.println ("Received - UNIQUE KEY: "+chgReq.uniqueKey);
-        System.out.println ("Received - RECORD: "+chgReq.record);
+        reqRec = gson.fromJson(json_record, RequestRecord.class);
+        System.out.println ("<----- REQUEST START -----<");
+        System.out.println ("Received - OPERATION: "+reqRec.operation);
+        System.out.println ("Received - UID_REFERENCE: "+reqRec.uid_reference);
+        System.out.println ("Received - UNIQUE KEY: "+reqRec.uniqueKey);
+        System.out.println ("Received - RECORD: "+reqRec.record);
+        System.out.println (">----- REQUEST END ----->");
         //
         //System.out.println ("Going to sleep for 2 seconds");
         //try{Thread.sleep(2000);}catch(InterruptedException e){System.out.println(e);}
