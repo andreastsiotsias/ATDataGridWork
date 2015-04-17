@@ -11,7 +11,7 @@ import java.util.Map;
  *
  * @author GB001894
  */
-public class changeDescriptor {
+public class RequestRecord {
     String operation;
     String uid_reference;
     Map<String, Object> uniqueKey;

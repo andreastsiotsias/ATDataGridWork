@@ -53,7 +53,7 @@ public class GoodsOperations extends HttpServlet {
     boolean isJSONP = false;
     //
     Enumeration<String> requestParams;
-    changeDescriptor chgReq = null;
+    RequestRecord chgReq = null;
     
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -117,7 +117,7 @@ public class GoodsOperations extends HttpServlet {
         json_oper = request.getParameter("Operation");
         // decode request from JSON to a Change Descriptor object
         json_record = request.getParameter("Record");
-        chgReq = gson.fromJson(json_record, changeDescriptor.class);
+        chgReq = gson.fromJson(json_record, RequestRecord.class);
         System.out.println ("Received - OPERATION: "+chgReq.operation);
         System.out.println ("Received - UID_REFERENCE: "+chgReq.uid_reference);
         System.out.println ("Received - UNIQUE KEY: "+chgReq.uniqueKey);
