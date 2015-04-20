@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author GB001894
  */
-public class GoodsDescriptor extends HttpServlet {
+public class DataObjectProfileManager extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -35,10 +35,10 @@ public class GoodsDescriptor extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet GoodsDescriptor</title>");            
+            out.println("<title>Servlet DataObjectProfileManager</title>");            
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet GoodsDescriptor at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet DataObjectProfileManager at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }

@@ -96,8 +96,8 @@ public class GoodsOperations extends HttpServlet {
     
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println ("Request Protocol: "+request.getProtocol());
-        System.out.println ("Request Method: "+request.getMethod());
+        //System.out.println ("Request Protocol: "+request.getProtocol());
+        //System.out.println ("Request Method: "+request.getMethod());
         // check if JSONP ....
         isJSONP = false;
         jsonpCallback = request.getParameter("callback");
@@ -105,25 +105,25 @@ public class GoodsOperations extends HttpServlet {
             isJSONP = true;
             System.out.println ("Request is JSONP with callback: "+jsonpCallback);
         }
-        System.out.println ("Request parameters Start");
+        //System.out.println ("Request parameters Start");
         requestParams = request.getParameterNames();
-        while (requestParams.hasMoreElements()) {
-            String param = requestParams.nextElement();
-            System.out.println ("--> "+param+" Value: "+request.getParameter(param));
-        }
-        System.out.println ("Request Parameters End");
+        //while (requestParams.hasMoreElements()) {
+        //    String param = requestParams.nextElement();
+        //    System.out.println ("--> "+param+" Value: "+request.getParameter(param));
+        //}
+        //System.out.println ("Request Parameters End");
         //
         // see what the request is
         json_oper = request.getParameter("Operation");
         // decode request from JSON to a Change Descriptor object
         json_record = request.getParameter("Record");
         reqRec = gson.fromJson(json_record, RequestRecord.class);
-        //System.out.println ("<----- REQUEST START -----<");
-        //System.out.println ("Received - OPERATION: "+reqRec.operation);
-        //System.out.println ("Received - UID_REFERENCE: "+reqRec.uid_reference);
-        //System.out.println ("Received - UNIQUE KEY: "+reqRec.uniqueKey);
-        //System.out.println ("Received - RECORD: "+reqRec.record);
-        //System.out.println (">----- REQUEST END ----->");
+        System.out.println ("<----- REQUEST START -----<");
+        System.out.println ("Received - OPERATION: "+reqRec.operation);
+        System.out.println ("Received - UID_REFERENCE: "+reqRec.uid_reference);
+        System.out.println ("Received - UNIQUE KEY: "+reqRec.uniqueKey);
+        System.out.println ("Received - RECORD: "+reqRec.record);
+        System.out.println (">----- REQUEST END ----->");
         //
         //System.out.println ("Going to sleep for 2 seconds");
         //try{Thread.sleep(2000);}catch(InterruptedException e){System.out.println(e);}
