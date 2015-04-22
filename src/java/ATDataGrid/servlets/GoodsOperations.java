@@ -18,6 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -54,6 +55,8 @@ public class GoodsOperations extends HttpServlet {
     //
     Enumeration<String> requestParams;
     RequestRecord reqRec = null;
+    //
+    HttpSession session;
     
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -98,6 +101,9 @@ public class GoodsOperations extends HttpServlet {
             throws ServletException, IOException {
         //System.out.println ("Request Protocol: "+request.getProtocol());
         //System.out.println ("Request Method: "+request.getMethod());
+        //
+        session = request.getSession();
+        System.out.println ("Session ID in GoodsOperations :"+session.getId());
         // check if JSONP ....
         isJSONP = false;
         jsonpCallback = request.getParameter("callback");

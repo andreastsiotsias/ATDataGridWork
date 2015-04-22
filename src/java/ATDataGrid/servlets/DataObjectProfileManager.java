@@ -7,16 +7,23 @@ package ATDataGrid.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Enumeration;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  *
  * @author GB001894
  */
 public class DataObjectProfileManager extends HttpServlet {
+    
+    String jsonpCallback = null;
+    boolean isJSONP = false;
+    Enumeration<String> requestParams;
+    HttpSession session;
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -29,18 +36,45 @@ public class DataObjectProfileManager extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
+        //
+        session = request.getSession();
+        // check if JSONP ....
+        isJSONP = false;
+        jsonpCallback = request.getParameter("callback");
+        if(jsonpCallback != null && !jsonpCallback.isEmpty()) {
+            isJSONP = true;
+            System.out.println ("Request is JSONP with callback: "+jsonpCallback);
+        }
+        //
+        System.out.println ("Request parameters Start");
+        requestParams = request.getParameterNames();
+        while (requestParams.hasMoreElements()) {
+            String param = requestParams.nextElement();
+            System.out.println ("--> "+param+" Value: "+request.getParameter(param));
+        }
+        System.out.println ("Request Parameters End");
+        //
+        if (request.getParameter("Operation").equals("REGISTER_AUTHENTICATION")) {
+            System.out.println ("Registering Authentication");
+            boolean wasRegisteredOK = registerAuthentication (
+                    request.getParameter("Access_Token"),
+                    request.getParameter("Issued_At"),
+                    request.getParameter("Expires_At")
+                    );
+            if (wasRegisteredOK) {
+                System.out.println ("Session was registered OK");
+            }
+        }
+        //
+        response.setContentType("application/json;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet DataObjectProfileManager</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet DataObjectProfileManager at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+            if (isJSONP) {
+                out.println(jsonpCallback+"({\"ReturnCode\": 0});");
+            }
+            else {
+                out.println("{\"ReturnCode\": 0}");
+            }
         }
     }
 
@@ -82,5 +116,15 @@ public class DataObjectProfileManager extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    private boolean registerAuthentication(String access_token, String issued_at_str, String expires_at_str) {
+        int issued_at = Integer.parseInt(issued_at_str);
+        int expires_at = Integer.parseInt(expires_at_str);
+        System.out.println ("Session ID is: "+session.getId());
+        session.setAttribute("access_token", access_token);
+        session.setAttribute("access_token_issued_at", issued_at);
+        session.setAttribute("access_token_expires_at", expires_at);
+        return true;
+    }
 
 }
