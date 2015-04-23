@@ -10,19 +10,16 @@ package ATWebAuth;
  *
  * @author GB001894
  */
+import ATDataGrid.servlets.GooglePlusSignInTokenInfo;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
  
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
  
 public class HttpClientExample {
  
@@ -32,85 +29,43 @@ public class HttpClientExample {
  
 		HttpClientExample http = new HttpClientExample();
  
-		System.out.println("Testing 1 - Send Http GET request");
-		http.sendGet();
- 
-		//System.out.println("\nTesting 2 - Send Http POST request");
-		//http.sendPost();
+		System.out.println("Send Http GET request");
+		boolean isValid = http.doAccessTokenValidation();
+                System.out.println ("Validated : "+isValid);
  
 	}
  
 	// HTTP GET request
-	private void sendGet() throws Exception {
- 
-		//String url = "https://www.googleapis.com/oauth2/v1/userinfo?access_token=ya29.WAH0guH9V_-7j4TXc6Jnxso5HQbxLH2FdeXdbW62_xN9P1UDHhFjI41EFmkudoFjN2K04LH4klFRFw";
-                //String url = "https://www.googleapis.com/userinfo/v2/me?access_token=ya29.WAG6HgyHWWtotn70kzjLdmj_yAMVRk-HE3DvGlEhJUeUCoFr3cuZgmqC1qQoRRiiJWRFm6dQn9HIFQ";
-                String url = "https://www.googleapis.com/oauth2/v2/userinfo?access_token=ya29.WAEy-2TQ_mmR0jGUsQU0eExPB597HsyIQvs2GJQDzDelsz0sz-6ogXb-WcGqMvA6sf6LNVNnT93jsg";
- 
-		//HttpClient client = new DefaultHttpClient();
-                HttpClient client = HttpClientBuilder.create().build();
-		HttpGet request = new HttpGet(url);
- 
-		// add request header
-		request.addHeader("User-Agent", USER_AGENT);
- 
-                System.out.println("\nSending 'GET' request to URL : " + url);
-		HttpResponse response = client.execute(request);
- 
-		System.out.println("Response Code : " + 
-                       response.getStatusLine().getStatusCode());
- 
-		BufferedReader rd = new BufferedReader(
-                       new InputStreamReader(response.getEntity().getContent()));
- 
-		StringBuffer result = new StringBuffer();
-		String line = "";
-		while ((line = rd.readLine()) != null) {
-			result.append(line);
-		}
- 
-		System.out.println(result.toString());
- 
+	private boolean doAccessTokenValidation () throws Exception {
+            String access_token="ya29.XgHOFfMKYSSkT6oePTOP8PHuoa8vFlEm65Y3mmIJAgwhTBNL6zEQva2RFMIOl_joxzn2j_L-Jt6HbA";
+            String client_id = "815038451936-611r1ll7e9tkdl1kvhhvc9dokp5e9176.apps.googleusercontent.com";
+            String url = "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token="+access_token;
+            HttpClient client = HttpClientBuilder.create().build();
+            HttpGet request = new HttpGet(url);
+            request.addHeader("User-Agent", USER_AGENT);
+            System.out.println("Sending 'GET' request to URL : " + url);
+            HttpResponse response = client.execute(request);
+            int reqRC = response.getStatusLine().getStatusCode();
+            System.out.println("Response Code : " + reqRC);
+            if (reqRC != 200) return false;
+            BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            StringBuffer result = new StringBuffer();
+            String line = "";
+            while ((line = rd.readLine()) != null) {
+                result.append(line);
+            }
+            Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+            GooglePlusSignInTokenInfo reqRec = gson.fromJson(result.toString(), GooglePlusSignInTokenInfo.class);
+            System.out.println ("Token issued to : "+reqRec.issued_to);
+            System.out.println ("Token audience : "+reqRec.audience);
+            System.out.println ("Token user id : "+reqRec.user_id);
+            System.out.println ("Token scope : "+reqRec.scope);
+            System.out.println ("Token expires in : "+reqRec.expires_in+" seconds");
+            System.out.println ("Token email : "+reqRec.email);
+            System.out.println ("Token verified_email : "+reqRec.verified_email);
+            System.out.println ("Token access type : "+reqRec.access_type);
+            if (!client_id.equals(reqRec.audience)) return false;
+            if (reqRec.expires_in < 1) return false;
+            return true;
 	}
- 
-	// HTTP POST request
-	private void sendPost() throws Exception {
- 
-		String url = "https://selfsolve.apple.com/wcResults.do";
- 
-		//HttpClient client = new DefaultHttpClient();
-		HttpClient client = HttpClientBuilder.create().build();
-                HttpPost post = new HttpPost(url);
- 
-		// add header
-		post.setHeader("User-Agent", USER_AGENT);
- 
-		List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-		urlParameters.add(new BasicNameValuePair("sn", "C02G8416DRJM"));
-		urlParameters.add(new BasicNameValuePair("cn", ""));
-		urlParameters.add(new BasicNameValuePair("locale", ""));
-		urlParameters.add(new BasicNameValuePair("caller", ""));
-		urlParameters.add(new BasicNameValuePair("num", "12345"));
- 
-		post.setEntity(new UrlEncodedFormEntity(urlParameters));
- 
-		HttpResponse response = client.execute(post);
-		System.out.println("\nSending 'POST' request to URL : " + url);
-		System.out.println("Post parameters : " + post.getEntity());
-		System.out.println("Response Code : " + 
-                                    response.getStatusLine().getStatusCode());
- 
-		BufferedReader rd = new BufferedReader(
-                        new InputStreamReader(response.getEntity().getContent()));
- 
-		StringBuffer result = new StringBuffer();
-		String line = "";
-		while ((line = rd.readLine()) != null) {
-			result.append(line);
-		}
- 
-		System.out.println(result.toString());
- 
-	}
- 
-}
+ }

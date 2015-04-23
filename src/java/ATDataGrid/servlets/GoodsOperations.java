@@ -69,7 +69,7 @@ public class GoodsOperations extends HttpServlet {
         gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
         //
         try {
-            // Load (and therefore register) the Sybase driver
+            // Load (and therefore register) the MySQL driver
             System.out.println("Loading driver ....");
             Class.forName("com.mysql.jdbc.Driver");
             System.out.println("Loaded driver !");
@@ -112,7 +112,7 @@ public class GoodsOperations extends HttpServlet {
             System.out.println ("Request is JSONP with callback: "+jsonpCallback);
         }
         //System.out.println ("Request parameters Start");
-        requestParams = request.getParameterNames();
+        //requestParams = request.getParameterNames();
         //while (requestParams.hasMoreElements()) {
         //    String param = requestParams.nextElement();
         //    System.out.println ("--> "+param+" Value: "+request.getParameter(param));
