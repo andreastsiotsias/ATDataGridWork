@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -45,36 +47,11 @@ public class DataObjectProfileManager extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         //
-        HttpSession session = request.getSession();
-        // check if JSONP ....
-        isJSONP = false;
-        jsonpCallback = request.getParameter("callback");
-        if(jsonpCallback != null && !jsonpCallback.isEmpty()) {
-            isJSONP = true;
-            System.out.println ("Request is JSONP with callback: "+jsonpCallback);
-        }
-        //
-        System.out.println ("Request parameters Start");
-        requestParams = request.getParameterNames();
-        while (requestParams.hasMoreElements()) {
-            String param = requestParams.nextElement();
-            System.out.println ("--> "+param+" Value: "+request.getParameter(param));
-        }
-        System.out.println ("Request Parameters End");
-        //
         if (request.getParameter("Operation").equals("REGISTER_AUTHENTICATION")) {
             System.out.println ("Registering Authentication");
-            boolean wasRegisteredOK = registerAuthentication (
-                    session,
-                    request.getParameter("Access_Token"),
-                    request.getParameter("Issued_At"),
-                    request.getParameter("Expires_At")
-                    );
-            if (wasRegisteredOK) {
-                System.out.println ("Session was registered OK");
-            }
+            registerAuthentication (request, response);
         }
-        //
+            //
         response.setContentType("application/json;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
@@ -126,9 +103,11 @@ public class DataObjectProfileManager extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
-    private boolean registerAuthentication(HttpSession session, String access_token, String issued_at_str, String expires_at_str) {
-        int issued_at = Integer.parseInt(issued_at_str);
-        int expires_at = Integer.parseInt(expires_at_str);
+    private void registerAuthentication(HttpServletRequest request, HttpServletResponse response) {
+        HttpSession session = request.getSession();
+        String access_token = request.getParameter("Access_Token");
+        int issued_at = Integer.parseInt(request.getParameter("Issued_At"));
+        int expires_at = Integer.parseInt(request.getParameter("Expires_At"));
         boolean isValidAccessToken = false;
         try {
             isValidAccessToken = doAccessTokenValidation (session, access_token, issued_at, expires_at);
@@ -139,50 +118,60 @@ public class DataObjectProfileManager extends HttpServlet {
         if (isValidAccessToken) {
             System.out.println ("Session ID is: "+session.getId());
             System.out.println ("Access Token Validated");
-            return true;
+            response.setContentType("application/json;charset=UTF-8");
+            try (PrintWriter out = response.getWriter()) {
+                out.println("{\"ReturnCode\": 0}");
+            } catch (IOException ex) {
+                Logger.getLogger(DataObjectProfileManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         else {
             System.out.println ("Access Token Is Not Valid");
-            return false;
+            response.setStatus(407);
+            try (PrintWriter out = response.getWriter()) {
+                out.println("{\"ReturnCode\": 407}");
+            } catch (IOException ex) {
+                Logger.getLogger(DataObjectProfileManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
     
     private boolean doAccessTokenValidation (HttpSession session, String access_token, int issued_at, int expires_at) throws Exception {
- 		//String access_token="ya29.XgHOFfMKYSSkT6oePTOP8PHuoa8vFlEm65Y3mmIJAgwhTBNL6zEQva2RFMIOl_joxzn2j_L-Jt6HbA";
-                String USER_AGENT = "Mozilla/5.0";
-                String client_id = "815038451936-611r1ll7e9tkdl1kvhhvc9dokp5e9176.apps.googleusercontent.com";
-                String url = "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token="+access_token;
- 		HttpClient client = HttpClientBuilder.create().build();
-		HttpGet request = new HttpGet(url);
-                request.addHeader("User-Agent", USER_AGENT);
-                System.out.println("Sending 'GET' request to URL : " + url);
-		HttpResponse response = client.execute(request);
-                int reqRC = response.getStatusLine().getStatusCode();
-		System.out.println("Response Code : " + reqRC);
-                if (reqRC != 200) return false;
-		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
- 		StringBuffer result = new StringBuffer();
-		String line = "";
-		while ((line = rd.readLine()) != null) {
-                    result.append(line);
-		}
-                Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
-                GooglePlusSignInTokenInfo reqRec = gson.fromJson(result.toString(), GooglePlusSignInTokenInfo.class);
-                System.out.println ("Token issued to : "+reqRec.issued_to);
-                System.out.println ("Token audience : "+reqRec.audience);
-                System.out.println ("Token user id : "+reqRec.user_id);
-                System.out.println ("Token scope : "+reqRec.scope);
-                System.out.println ("Token expires in : "+reqRec.expires_in+" seconds");
-                System.out.println ("Token email : "+reqRec.email);
-                System.out.println ("Token verified_email : "+reqRec.verified_email);
-                System.out.println ("Token access type : "+reqRec.access_type);
-                if (!client_id.equals(reqRec.audience)) return false;
-                if (reqRec.expires_in < 1) return false;
-                session.setAttribute("access_token", access_token);
-                session.setAttribute("access_token_user_email", reqRec.email);
-                session.setAttribute("access_token_issued_at", issued_at);
-                session.setAttribute("access_token_expires_at", expires_at);
-                return true;
+ 	//String access_token="ya29.XgHOFfMKYSSkT6oePTOP8PHuoa8vFlEm65Y3mmIJAgwhTBNL6zEQva2RFMIOl_joxzn2j_L-Jt6HbA";
+        String USER_AGENT = "Mozilla/5.0";
+        String client_id = "815038451936-611r1ll7e9tkdl1kvhhvc9dokp5e9176.apps.googleusercontent.com";
+        String url = "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token="+access_token;
+ 	HttpClient client = HttpClientBuilder.create().build();
+	HttpGet request = new HttpGet(url);
+        request.addHeader("User-Agent", USER_AGENT);
+        System.out.println("Sending 'GET' request to URL : " + url);
+	HttpResponse response = client.execute(request);
+        int reqRC = response.getStatusLine().getStatusCode();
+	System.out.println("Response Code : " + reqRC);
+        if (reqRC != 200) return false;
+	BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+ 	StringBuffer result = new StringBuffer();
+	String line = "";
+	while ((line = rd.readLine()) != null) {
+            result.append(line);
 	}
+        Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+        GooglePlusSignInTokenInfo reqRec = gson.fromJson(result.toString(), GooglePlusSignInTokenInfo.class);
+        System.out.println ("Token issued to : "+reqRec.issued_to);
+        System.out.println ("Token audience : "+reqRec.audience);
+        System.out.println ("Token user id : "+reqRec.user_id);
+        System.out.println ("Token scope : "+reqRec.scope);
+        System.out.println ("Token expires in : "+reqRec.expires_in+" seconds");
+        System.out.println ("Token email : "+reqRec.email);
+        System.out.println ("Token verified_email : "+reqRec.verified_email);
+        System.out.println ("Token access type : "+reqRec.access_type);
+        if (!client_id.equals(reqRec.audience)) return false;
+        if (reqRec.expires_in < 1) return false;
+        session.setAttribute("access_token", access_token);
+        session.setAttribute("access_token_user_email", reqRec.email);
+        session.setAttribute("access_token_issued_at", issued_at);
+        session.setAttribute("access_token_expires_at", expires_at);
+        return true;
+    }
 
 }
