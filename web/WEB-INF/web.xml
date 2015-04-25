@@ -34,19 +34,11 @@
         <servlet-class>ATDataGrid.servlets.DataObjectProfileManager</servlet-class>
         <init-param>
             <param-name>ProjectID</param-name>
-            <param-value>ATDataGridWork</param-value>
+            <param-value>at-guide-web-v3-0-1</param-value>
         </init-param>
         <init-param>
             <param-name>ClientID</param-name>
-            <param-value>815038451936-611r1ll7e9tkdl1kvhhvc9dokp5e9176.apps.googleusercontent.com</param-value>
-        </init-param>
-        <init-param>
-            <param-name>ClientSecret</param-name>
-            <param-value>zqt7Pc4Jkp2L5rNRgqatwbaW</param-value>
-        </init-param>
-        <init-param>
-            <param-name>EmailAddress</param-name>
-            <param-value>815038451936-611r1ll7e9tkdl1kvhhvc9dokp5e9176@developer.gserviceaccount.com</param-value>
+            <param-value>779306128660-oifef8cadlkgapshmob99df5jhvf193e.apps.googleusercontent.com</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
